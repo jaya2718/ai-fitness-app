@@ -1,0 +1,334 @@
+{% extends "base.html" %}
+{% block title %}{{ plan_data.plan_title }} – FitAI{% endblock %}
+
+{% block extra_css %}
+<style>
+  .plan-hero {
+    background: linear-gradient(135deg, rgba(67,233,123,0.1), rgba(56,249,215,0.05));
+    border-bottom: 1px solid var(--border);
+    padding: 2.5rem 0;
+  }
+  .day-tabs {
+    display: flex; gap: 0.5rem; flex-wrap: wrap;
+    margin-bottom: 2rem; background: var(--card);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 0.75rem;
+  }
+  .day-tab {
+    padding: 0.6rem 1.1rem; border-radius: var(--radius-sm);
+    cursor: pointer; font-size: 0.85rem; font-weight: 600;
+    border: 1px solid transparent; transition: all 0.2s;
+    background: none; color: var(--muted);
+  }
+  .day-tab:hover { background: var(--card2); color: var(--text); }
+  .day-tab.active {
+    background: linear-gradient(135deg, #43e97b, #38f9d7);
+    color: #0d1a12; border-color: transparent;
+    box-shadow: 0 4px 12px rgba(67,233,123,0.4);
+  }
+  .day-panel { display: none; }
+  .day-panel.active { display: block; }
+
+  .meal-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 1rem;
+    overflow: hidden;
+    transition: all 0.3s;
+  }
+  .meal-card:hover { border-color: var(--success); box-shadow: 0 4px 15px rgba(67,233,123,0.1); }
+  .meal-card-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--card2); cursor: pointer;
+  }
+  .meal-card-header h4 { font-size: 1rem; font-weight: 700; }
+  .meal-card-body { padding: 1.5rem; }
+  .meal-type-badge {
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.5px;
+    text-transform: uppercase; padding: 0.25rem 0.75rem;
+    border-radius: 100px;
+  }
+
+  .ingredient-list {
+    display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1rem;
+  }
+  .ingredient-chip {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 100px; padding: 0.25rem 0.75rem;
+    font-size: 0.78rem; color: var(--muted);
+  }
+
+  .recipe-box {
+    background: rgba(67,233,123,0.05); border: 1px solid rgba(67,233,123,0.15);
+    border-radius: var(--radius-sm); padding: 1rem;
+    font-size: 0.875rem; line-height: 1.8; color: var(--muted);
+    margin-top: 0.75rem;
+  }
+
+  .macro-grid {
+    display: grid; grid-template-columns: repeat(4,1fr); gap: 0.75rem;
+    margin-top: 1rem;
+  }
+  .macro-item {
+    text-align: center; background: var(--bg2);
+    border-radius: var(--radius-sm); padding: 0.75rem 0.5rem;
+    border: 1px solid var(--border);
+  }
+  .macro-item .val { font-size: 1.1rem; font-weight: 800; }
+  .macro-item .lbl { font-size: 0.7rem; color: var(--muted); margin-top:0.2rem; }
+
+  .day-summary {
+    background: var(--card2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+    display: flex; gap: 1.5rem; flex-wrap: wrap; align-items: center;
+  }
+  .day-summary-stat { text-align:center; }
+  .day-summary-stat .num { font-size:1.4rem; font-weight:800; }
+  .day-summary-stat .lbl { font-size:0.75rem; color:var(--muted); }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- PLAN HERO -->
+<div class="plan-hero">
+  <div class="container">
+    <div class="flex-between" style="flex-wrap:wrap;gap:1rem;">
+      <div>
+        <div class="flex gap-2 mb-2">
+          <span class="badge badge-success"><i class="fas fa-utensils"></i> Meal Plan</span>
+          <span class="badge badge-success">Active</span>
+        </div>
+        <h1 style="font-size:1.8rem;font-weight:800;margin-bottom:0.5rem;">{{ plan_data.plan_title }}</h1>
+        <div class="flex gap-3 mt-2" style="flex-wrap:wrap;">
+          <span style="font-size:0.9rem;color:var(--muted);">
+            <i class="fas fa-fire text-warning"></i>
+            <strong style="color:var(--text);">{{ plan_data.daily_calories }}</strong> kcal/day
+          </span>
+          {% if plan_data.macros %}
+          <span style="font-size:0.9rem;color:var(--muted);">
+            <i class="fas fa-drumstick-bite" style="color:#43e97b;"></i>
+            Protein: <strong style="color:#43e97b;">{{ plan_data.macros.protein_g }}g</strong>
+          </span>
+          <span style="font-size:0.9rem;color:var(--muted);">
+            <i class="fas fa-bread-slice" style="color:var(--warning);"></i>
+            Carbs: <strong style="color:var(--warning);">{{ plan_data.macros.carbs_g }}g</strong>
+          </span>
+          <span style="font-size:0.9rem;color:var(--muted);">
+            <i class="fas fa-oil-can" style="color:var(--secondary);"></i>
+            Fats: <strong style="color:var(--secondary);">{{ plan_data.macros.fats_g }}g</strong>
+          </span>
+          {% endif %}
+        </div>
+      </div>
+      <div style="display:flex;gap:0.75rem;flex-wrap:wrap;align-self:flex-start;">
+        <a href="{{ url_for('diet.generate') }}" class="btn btn-success btn-sm">
+          <i class="fas fa-sync-alt"></i> Regenerate
+        </a>
+        <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary btn-sm">
+          <i class="fas fa-home"></i> Dashboard
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page-content">
+  <div class="container">
+
+    <!-- TIPS & SHOPPING -->
+    {% if plan_data.shopping_tips or plan_data.meal_prep_tips %}
+    <div class="grid-2 mb-4">
+      {% if plan_data.shopping_tips %}
+      <div class="card">
+        <h3 style="font-size:0.9rem;font-weight:700;color:var(--success);margin-bottom:0.75rem;">
+          <i class="fas fa-shopping-cart"></i> Budget Shopping Tips
+        </h3>
+        {% for tip in plan_data.shopping_tips %}
+        <div style="font-size:0.85rem;color:var(--muted);display:flex;gap:0.5rem;margin-bottom:0.4rem;">
+          <span style="color:var(--success);">✓</span> {{ tip }}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% if plan_data.meal_prep_tips %}
+      <div class="card">
+        <h3 style="font-size:0.9rem;font-weight:700;color:var(--warning);margin-bottom:0.75rem;">
+          <i class="fas fa-clock"></i> Meal Prep Tips
+        </h3>
+        {% for tip in plan_data.meal_prep_tips %}
+        <div style="font-size:0.85rem;color:var(--muted);display:flex;gap:0.5rem;margin-bottom:0.4rem;">
+          <span style="color:var(--warning);">⏱</span> {{ tip }}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- DAY TABS -->
+    <div class="day-tabs">
+      {% for day in plan_data.days %}
+      <button class="day-tab {% if loop.first %}active{% endif %}"
+              onclick="showDay('meal-day-{{ loop.index }}')"
+              id="tab-meal-day-{{ loop.index }}">
+        🥗 {{ day.day[:3] }}
+      </button>
+      {% endfor %}
+    </div>
+
+    <!-- DAY PANELS -->
+    {% for day in plan_data.days %}
+    <div class="day-panel {% if loop.first %}active{% endif %}" id="meal-day-{{ loop.index }}">
+
+      <h2 style="font-size:1.4rem;font-weight:800;margin-bottom:1rem;">{{ day.day }}</h2>
+
+      <!-- DAY SUMMARY -->
+      <div class="day-summary">
+        <div class="day-summary-stat">
+          <div class="num" style="color:var(--warning);">{{ day.total_calories }}</div>
+          <div class="lbl">Total Calories</div>
+        </div>
+        {% set meals_list = day.meals.values() | list if day.meals else [] %}
+        {% set total_protein = namespace(val=0) %}
+        {% set total_carbs = namespace(val=0) %}
+        {% set total_fats = namespace(val=0) %}
+        {% set total_cost = namespace(val=0) %}
+        {% if day.meals %}
+          {% for meal in day.meals.values() %}
+            {% if meal.protein_g %}{% set total_protein.val = total_protein.val + meal.protein_g %}{% endif %}
+            {% if meal.carbs_g %}{% set total_carbs.val = total_carbs.val + meal.carbs_g %}{% endif %}
+            {% if meal.fats_g %}{% set total_fats.val = total_fats.val + meal.fats_g %}{% endif %}
+          {% endfor %}
+        {% endif %}
+        <div class="day-summary-stat">
+          <div class="num" style="color:#43e97b;">~{{ total_protein.val | int }}g</div>
+          <div class="lbl">Protein</div>
+        </div>
+        <div class="day-summary-stat">
+          <div class="num" style="color:var(--warning);">~{{ total_carbs.val | int }}g</div>
+          <div class="lbl">Carbs</div>
+        </div>
+        <div class="day-summary-stat">
+          <div class="num" style="color:var(--secondary);">~{{ total_fats.val | int }}g</div>
+          <div class="lbl">Fats</div>
+        </div>
+        <div class="day-summary-stat">
+          <div class="num" style="color:var(--info);">5 meals</div>
+          <div class="lbl">Today</div>
+        </div>
+      </div>
+
+      {% if day.meals %}
+        {% set meal_emojis = {'breakfast':'🌅','morning_snack':'🍎','lunch':'🍱','afternoon_snack':'☕','dinner':'🌙'} %}
+        {% set meal_colors = {'breakfast':'warning','morning_snack':'success','lunch':'primary','afternoon_snack':'info','dinner':'secondary'} %}
+
+        {% for meal_key, meal in day.meals.items() %}
+        <div class="meal-card">
+          <div class="meal-card-header" onclick="toggleMeal(this)">
+            <div class="flex gap-2 align-items-center" style="display:flex;align-items:center;gap:0.75rem;">
+              <span style="font-size:1.5rem;">{{ meal_emojis.get(meal_key, '🍽') }}</span>
+              <div>
+                <div style="font-size:0.7rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">
+                  {{ meal_key | replace('_', ' ') | title }}
+                </div>
+                <h4>{{ meal.name }}</h4>
+              </div>
+            </div>
+            <div style="display:flex;gap:1rem;align-items:center;">
+              <span style="font-size:0.85rem;color:var(--warning);font-weight:700;">
+                <i class="fas fa-fire"></i> {{ meal.calories }} kcal
+              </span>
+              {% if meal.estimated_cost %}
+              <span class="badge badge-success" style="font-size:0.75rem;">{{ meal.estimated_cost }}</span>
+              {% endif %}
+              {% if meal.prep_time_min %}
+              <span style="font-size:0.8rem;color:var(--muted);">
+                <i class="fas fa-clock"></i> {{ meal.prep_time_min }} min
+              </span>
+              {% endif %}
+              <i class="fas fa-chevron-down" style="color:var(--muted);transition:transform 0.3s;"></i>
+            </div>
+          </div>
+          <div class="meal-card-body" style="display:none;">
+
+            <!-- MACROS -->
+            <div class="macro-grid mb-3">
+              <div class="macro-item">
+                <div class="val" style="color:var(--warning);">{{ meal.calories or '—' }}</div>
+                <div class="lbl">kcal</div>
+              </div>
+              <div class="macro-item">
+                <div class="val" style="color:#43e97b;">{{ meal.protein_g or '—' }}g</div>
+                <div class="lbl">Protein</div>
+              </div>
+              <div class="macro-item">
+                <div class="val" style="color:var(--warning);">{{ meal.carbs_g or '—' }}g</div>
+                <div class="lbl">Carbs</div>
+              </div>
+              <div class="macro-item">
+                <div class="val" style="color:var(--secondary);">{{ meal.fats_g or '—' }}g</div>
+                <div class="lbl">Fats</div>
+              </div>
+            </div>
+
+            <!-- INGREDIENTS -->
+            {% if meal.ingredients %}
+            <div style="font-size:0.8rem;font-weight:700;color:var(--muted);margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.5px;">Ingredients</div>
+            <div class="ingredient-list">
+              {% for ing in meal.ingredients %}
+              <span class="ingredient-chip">{{ ing }}</span>
+              {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- RECIPE -->
+            {% if meal.recipe %}
+            <div style="font-size:0.8rem;font-weight:700;color:var(--muted);margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.5px;">How to Prepare</div>
+            <div class="recipe-box">
+              <i class="fas fa-chef-hat" style="color:var(--success);"></i> {{ meal.recipe }}
+            </div>
+            {% endif %}
+
+          </div>
+        </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+    {% endfor %}
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function showDay(id) {
+  document.querySelectorAll('.day-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.day-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.getElementById('tab-' + id).classList.add('active');
+}
+
+function toggleMeal(header) {
+  const body = header.nextElementSibling;
+  const icon = header.querySelector('.fa-chevron-down');
+  if (body.style.display === 'none' || !body.style.display) {
+    body.style.display = 'block';
+    icon.style.transform = 'rotate(180deg)';
+  } else {
+    body.style.display = 'none';
+    icon.style.transform = 'rotate(0deg)';
+  }
+}
+
+// Auto-open breakfast on load
+document.addEventListener('DOMContentLoaded', () => {
+  const firstMealHeader = document.querySelector('.meal-card-header');
+  if (firstMealHeader) toggleMeal(firstMealHeader);
+});
+</script>
+{% endblock %}

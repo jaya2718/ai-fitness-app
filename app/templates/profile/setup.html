@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+{% block title %}Complete Your Profile – FitAI{% endblock %}
+
+{% block extra_css %}
+<style>
+  .profile-setup {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem;
+  }
+  .setup-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+  .setup-header h1 {
+    font-size: 2rem; font-weight: 800;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    margin-bottom: 0.5rem;
+  }
+  .setup-header p { color: var(--muted); }
+
+  .section-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+  }
+  .section-card-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 0.75rem;
+    background: var(--card2);
+  }
+  .section-card-header h3 { font-size: 1rem; font-weight: 700; }
+  .section-card-header .section-icon {
+    width: 36px; height: 36px;
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+  }
+  .section-card-body { padding: 1.5rem; }
+
+  .step-indicator {
+    display: flex; justify-content: center; gap: 1rem;
+    margin-bottom: 2rem; flex-wrap: wrap;
+  }
+  .step-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: all 0.3s;
+  }
+  .step-dot.active { background: var(--primary); box-shadow: 0 0 8px rgba(108,99,255,0.5); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-setup">
+  <div class="setup-header">
+    <div style="font-size:3rem;margin-bottom:1rem;">🎯</div>
+    <h1>{% if editing %}Update Your Profile{% else %}Set Up Your Profile{% endif %}</h1>
+    <p>{% if editing %}Update your details to get fresh personalized recommendations.{% else %}Tell us about yourself so we can create the perfect plan for you.{% endif %}</p>
+  </div>
+
+  <form method="POST" action="">
+    {{ form.hidden_tag() }}
+
+    <!-- PHYSICAL DETAILS -->
+    <div class="section-card">
+      <div class="section-card-header">
+        <div class="section-icon" style="background:rgba(108,99,255,0.15);">🏋️</div>
+        <h3>Physical Details</h3>
+      </div>
+      <div class="section-card-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Age *</label>
+            {{ form.age(class="form-control", placeholder="e.g. 21") }}
+            {% for e in form.age.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+          </div>
+          <div class="form-group">
+            <label class="form-label">Gender *</label>
+            {{ form.gender(class="form-select") }}
+            {% for e in form.gender.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Height (cm) *</label>
+            {{ form.height_cm(class="form-control", placeholder="e.g. 170") }}
+            {% for e in form.height_cm.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+          </div>
+          <div class="form-group">
+            <label class="form-label">Weight (kg) *</label>
+            {{ form.weight_kg(class="form-control", placeholder="e.g. 65") }}
+            {% for e in form.weight_kg.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Fitness Goal *</label>
+            {{ form.goal(class="form-select") }}
+            {% for e in form.goal.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+          </div>
+          <div class="form-group">
+            <label class="form-label">Fitness Level *</label>
+            {{ form.fitness_level(class="form-select") }}
+            {% for e in form.fitness_level.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Daily Activity Level *</label>
+          {{ form.activity_level(class="form-select") }}
+          {% for e in form.activity_level.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Health Conditions / Injuries</label>
+          {{ form.health_conditions(class="form-control", rows="2", placeholder="e.g. knee injury, lower back pain, asthma — leave blank if none") }}
+          <div class="form-hint">This helps us avoid exercises that may aggravate your conditions.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIET PREFERENCES -->
+    <div class="section-card">
+      <div class="section-card-header">
+        <div class="section-icon" style="background:rgba(67,233,123,0.15);">🥗</div>
+        <h3>Diet & Nutrition Preferences</h3>
+      </div>
+      <div class="section-card-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Diet Type *</label>
+            {{ form.diet_type(class="form-select") }}
+            {% for e in form.diet_type.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+          </div>
+          <div class="form-group">
+            <label class="form-label">Food Culture / Cuisine *</label>
+            {{ form.food_culture(class="form-select") }}
+            {% for e in form.food_culture.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Food Allergies / Intolerances</label>
+            {{ form.allergies(class="form-control", placeholder="e.g. nuts, gluten, dairy — leave blank if none") }}
+            <div class="form-hint">We'll make sure your meal plan avoids these completely.</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Daily Food Budget (USD) *</label>
+            {{ form.budget_per_day(class="form-control", placeholder="e.g. 8") }}
+            <div class="form-hint">We'll build affordable meals within your budget.</div>
+            {% for e in form.budget_per_day.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WORKOUT PREFERENCES -->
+    <div class="section-card">
+      <div class="section-card-header">
+        <div class="section-icon" style="background:rgba(247,151,30,0.15);">🏃</div>
+        <h3>Workout Preferences</h3>
+      </div>
+      <div class="section-card-body">
+        <div class="form-group">
+          <label class="form-label">Available Equipment *</label>
+          {{ form.available_equipment(class="form-select") }}
+          {% for e in form.available_equipment.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Workout Days Per Week *</label>
+            {{ form.workout_days_per_week(class="form-select") }}
+            {% for e in form.workout_days_per_week.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+          </div>
+          <div class="form-group">
+            <label class="form-label">Session Duration *</label>
+            {{ form.workout_duration_min(class="form-select") }}
+            {% for e in form.workout_duration_min.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="text-center">
+      <button type="submit" class="btn btn-primary btn-lg" style="min-width:300px; justify-content:center;">
+        <i class="fas fa-magic"></i>
+        {% if editing %}Update Profile{% else %}Save Profile & Generate AI Plans{% endif %}
+      </button>
+      {% if editing %}
+        <div class="mt-2">
+          <a href="{{ url_for('main.dashboard') }}" class="text-muted" style="font-size:0.9rem;">← Back to Dashboard</a>
+        </div>
+      {% endif %}
+    </div>
+  </form>
+</div>
+{% endblock %}

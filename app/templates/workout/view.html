@@ -1,0 +1,289 @@
+{% extends "base.html" %}
+{% block title %}{{ plan_data.plan_title }} – FitAI{% endblock %}
+
+{% block extra_css %}
+<style>
+  .plan-hero {
+    background: linear-gradient(135deg, rgba(108,99,255,0.15), rgba(255,101,132,0.08));
+    border-bottom: 1px solid var(--border);
+    padding: 2.5rem 0;
+  }
+  .day-tabs {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.75rem;
+  }
+  .day-tab {
+    padding: 0.6rem 1.1rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+    background: none;
+    color: var(--muted);
+  }
+  .day-tab:hover { background: var(--card2); color: var(--text); }
+  .day-tab.active {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white; border-color: transparent;
+    box-shadow: 0 4px 12px rgba(108,99,255,0.4);
+  }
+  .day-tab.rest { color: var(--muted); }
+  .day-tab.rest.active {
+    background: var(--card2); color: var(--text);
+    box-shadow: none;
+  }
+  .day-panel { display: none; }
+  .day-panel.active { display: block; }
+
+  .exercise-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 0.75rem;
+    transition: all 0.2s;
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  .exercise-card:hover { border-color: var(--primary); }
+  .exercise-num {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 0.85rem;
+    color: white; flex-shrink: 0;
+  }
+  .exercise-info { flex: 1; }
+  .exercise-name { font-weight: 700; font-size: 1rem; margin-bottom: 0.3rem; }
+  .exercise-meta {
+    display: flex; gap: 0.75rem; flex-wrap: wrap;
+    font-size: 0.78rem; color: var(--muted); margin-bottom: 0.5rem;
+  }
+  .exercise-meta span {
+    background: var(--bg2); padding: 0.2rem 0.6rem;
+    border-radius: 100px; border: 1px solid var(--border);
+  }
+  .exercise-desc { font-size: 0.85rem; color: var(--muted); line-height: 1.6; }
+  .mod-box {
+    background: rgba(108,99,255,0.08);
+    border: 1px solid rgba(108,99,255,0.2);
+    border-radius: var(--radius-sm);
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+    color: var(--primary);
+    margin-top: 0.5rem;
+  }
+
+  .warmup-item, .cooldown-item {
+    display: flex; gap: 1rem; align-items: flex-start;
+    background: var(--card2); border-radius: var(--radius-sm);
+    padding: 0.75rem 1rem; margin-bottom: 0.5rem;
+    border: 1px solid var(--border);
+    font-size: 0.88rem;
+  }
+  .warmup-item i { color: var(--warning); }
+  .cooldown-item i { color: var(--info); }
+
+  .section-label {
+    font-size: 0.75rem; font-weight: 700; letter-spacing: 1px;
+    color: var(--muted); text-transform: uppercase;
+    margin: 1.5rem 0 0.75rem;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .section-label::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+  .rest-day-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 3rem;
+    text-align: center;
+  }
+  .rest-day-card .rest-icon { font-size: 4rem; margin-bottom: 1rem; }
+  .rest-day-card h3 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.75rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- PLAN HERO -->
+<div class="plan-hero">
+  <div class="container">
+    <div class="flex-between" style="flex-wrap:wrap;gap:1rem;">
+      <div>
+        <div class="flex gap-2 mb-2" style="flex-wrap:wrap;">
+          <span class="badge badge-primary"><i class="fas fa-dumbbell"></i> Workout Plan</span>
+          <span class="badge badge-success">Active</span>
+        </div>
+        <h1 style="font-size:1.8rem;font-weight:800;margin-bottom:0.5rem;">{{ plan_data.plan_title }}</h1>
+        <p class="text-muted">{{ plan_data.weekly_overview }}</p>
+      </div>
+      <div style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:flex-start;">
+        <a href="{{ url_for('workout.generate') }}" class="btn btn-primary btn-sm">
+          <i class="fas fa-sync-alt"></i> Regenerate
+        </a>
+        <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary btn-sm">
+          <i class="fas fa-home"></i> Dashboard
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page-content">
+  <div class="container">
+
+    <!-- TIPS ROW -->
+    {% if plan_data.tips %}
+    <div class="card mb-4" style="background:linear-gradient(135deg,rgba(108,99,255,0.08),rgba(255,101,132,0.05));">
+      <h3 style="font-size:0.9rem;font-weight:700;color:var(--primary);margin-bottom:1rem;">
+        <i class="fas fa-lightbulb"></i> AI Tips for Your Plan
+      </h3>
+      <div class="grid-3" style="gap:0.75rem;">
+        {% for tip in plan_data.tips %}
+        <div style="font-size:0.85rem;color:var(--muted);display:flex;gap:0.5rem;">
+          <span style="color:var(--accent);">✓</span> {{ tip }}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- DAY TABS -->
+    <div class="day-tabs">
+      {% for day in plan_data.days %}
+      <button class="day-tab {% if day.day_type == 'rest' %}rest{% endif %} {% if loop.first %}active{% endif %}"
+              onclick="showDay('day-{{ loop.index }}')"
+              id="tab-day-{{ loop.index }}">
+        {% if day.day_type == 'rest' %}😴{% else %}💪{% endif %}
+        {{ day.day[:3] }}
+      </button>
+      {% endfor %}
+    </div>
+
+    <!-- DAY PANELS -->
+    {% for day in plan_data.days %}
+    <div class="day-panel {% if loop.first %}active{% endif %}" id="day-{{ loop.index }}">
+
+      <!-- DAY HEADER -->
+      <div class="flex-between mb-3" style="flex-wrap:wrap;gap:1rem;">
+        <div>
+          <h2 style="font-size:1.4rem;font-weight:800;">{{ day.day }}</h2>
+          <div class="flex gap-2 mt-1">
+            <span class="badge badge-primary">{{ day.focus }}</span>
+            {% if day.day_type != 'rest' %}
+            <span class="badge badge-warning"><i class="fas fa-clock"></i> {{ day.duration_min or 45 }} min</span>
+            {% endif %}
+          </div>
+        </div>
+        {% if day.notes %}
+        <div class="card" style="padding:0.75rem 1rem;max-width:350px;">
+          <span style="font-size:0.8rem;color:var(--muted);"><i class="fas fa-info-circle text-info"></i> {{ day.notes }}</span>
+        </div>
+        {% endif %}
+      </div>
+
+      {% if day.day_type == 'rest' %}
+      <!-- REST DAY -->
+      <div class="rest-day-card">
+        <div class="rest-icon">😴</div>
+        <h3>Rest & Recovery Day</h3>
+        <p class="text-muted">Your muscles grow during rest. Today, focus on recovery, hydration, and light stretching.</p>
+        <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-top:1.5rem;">
+          <div class="card" style="padding:1rem 1.5rem;text-align:center;min-width:150px;">
+            <div style="font-size:1.5rem;margin-bottom:0.5rem;">💧</div>
+            <div style="font-size:0.85rem;color:var(--muted);">Drink 8+ glasses of water</div>
+          </div>
+          <div class="card" style="padding:1rem 1.5rem;text-align:center;min-width:150px;">
+            <div style="font-size:1.5rem;margin-bottom:0.5rem;">🧘</div>
+            <div style="font-size:0.85rem;color:var(--muted);">Light stretching or yoga</div>
+          </div>
+          <div class="card" style="padding:1rem 1.5rem;text-align:center;min-width:150px;">
+            <div style="font-size:1.5rem;margin-bottom:0.5rem;">😴</div>
+            <div style="font-size:0.85rem;color:var(--muted);">Get 7–9 hours of sleep</div>
+          </div>
+        </div>
+      </div>
+      {% else %}
+      <!-- WARM UP -->
+      {% if day.warm_up %}
+      <div class="section-label"><i class="fas fa-fire-flame-curved" style="color:var(--warning);"></i> Warm Up</div>
+      {% for ex in day.warm_up %}
+      <div class="warmup-item">
+        <i class="fas fa-circle-dot" style="margin-top:3px;"></i>
+        <div>
+          <strong>{{ ex.exercise }}</strong>
+          {% if ex.duration %}<span class="badge badge-warning" style="margin-left:0.5rem;font-size:0.7rem;">{{ ex.duration }}</span>{% endif %}
+          {% if ex.description %}<div style="margin-top:0.25rem;color:var(--muted);">{{ ex.description }}</div>{% endif %}
+        </div>
+      </div>
+      {% endfor %}
+      {% endif %}
+
+      <!-- MAIN WORKOUT -->
+      {% if day.main_workout %}
+      <div class="section-label"><i class="fas fa-dumbbell" style="color:var(--primary);"></i> Main Workout</div>
+      {% for ex in day.main_workout %}
+      <div class="exercise-card">
+        <div class="exercise-num">{{ loop.index }}</div>
+        <div class="exercise-info">
+          <div class="exercise-name">{{ ex.exercise }}</div>
+          <div class="exercise-meta">
+            {% if ex.sets %}<span>🔢 {{ ex.sets }} sets</span>{% endif %}
+            {% if ex.reps %}<span>🔄 {{ ex.reps }} reps</span>{% endif %}
+            {% if ex.rest %}<span>⏱ {{ ex.rest }} rest</span>{% endif %}
+            {% if ex.muscle_group %}<span>💪 {{ ex.muscle_group }}</span>{% endif %}
+          </div>
+          {% if ex.description %}<div class="exercise-desc">{{ ex.description }}</div>{% endif %}
+          {% if ex.modification %}
+          <div class="mod-box"><i class="fas fa-info-circle"></i> <strong>Easier:</strong> {{ ex.modification }}</div>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+      {% endif %}
+
+      <!-- COOL DOWN -->
+      {% if day.cool_down %}
+      <div class="section-label"><i class="fas fa-snowflake" style="color:var(--info);"></i> Cool Down</div>
+      {% for ex in day.cool_down %}
+      <div class="cooldown-item">
+        <i class="fas fa-circle-dot" style="margin-top:3px;"></i>
+        <div>
+          <strong>{{ ex.exercise }}</strong>
+          {% if ex.duration %}<span class="badge badge-info" style="margin-left:0.5rem;font-size:0.7rem;">{{ ex.duration }}</span>{% endif %}
+          {% if ex.description %}<div style="margin-top:0.25rem;color:var(--muted);">{{ ex.description }}</div>{% endif %}
+        </div>
+      </div>
+      {% endfor %}
+      {% endif %}
+      {% endif %}
+
+    </div>
+    {% endfor %}
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function showDay(id) {
+  document.querySelectorAll('.day-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.day-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const idx = id.split('-')[1];
+  document.getElementById('tab-' + id).classList.add('active');
+}
+</script>
+{% endblock %}

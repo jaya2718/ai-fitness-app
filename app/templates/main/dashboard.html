@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+{% block title %}Dashboard – FitAI{% endblock %}
+
+{% block extra_css %}
+<style>
+  .dashboard-header {
+    background: linear-gradient(135deg, var(--card), var(--card2));
+    border-bottom: 1px solid var(--border);
+    padding: 2.5rem 0;
+  }
+  .welcome-text span {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .bmi-ring {
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column;
+    font-weight: 800;
+    border: 4px solid;
+    flex-shrink: 0;
+  }
+  .tip-card {
+    background: linear-gradient(135deg, rgba(108,99,255,0.1), rgba(255,101,132,0.1));
+    border: 1px solid rgba(108,99,255,0.2);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .tip-card::before {
+    content: '"';
+    position: absolute;
+    top: -10px; left: 1rem;
+    font-size: 6rem;
+    color: rgba(108,99,255,0.1);
+    font-family: Georgia, serif;
+    line-height: 1;
+  }
+  .plan-action-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.3s;
+  }
+  .plan-action-card:hover {
+    border-color: var(--primary);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow);
+  }
+  .plan-icon {
+    width: 80px; height: 80px;
+    border-radius: var(--radius);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.5rem;
+    margin: 0 auto 1.25rem;
+  }
+  .macro-bar {
+    display: flex; gap: 0.5rem; margin-top: 0.75rem;
+  }
+  .macro-chip {
+    flex: 1; text-align: center;
+    background: var(--bg2);
+    border-radius: var(--radius-sm);
+    padding: 0.5rem;
+    font-size: 0.8rem;
+  }
+  .macro-chip span { display:block; font-weight:700; font-size:1rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- DASHBOARD HEADER -->
+<div class="dashboard-header">
+  <div class="container">
+    <div class="flex-between" style="flex-wrap:wrap; gap:1rem;">
+      <div>
+        <div class="welcome-text" style="font-size:1.8rem; font-weight:800;">
+          Hey, <span>{{ user.username }}! 👋</span>
+        </div>
+        <p class="text-muted mt-1">Here's your personalized fitness overview for today.</p>
+      </div>
+      <div class="flex gap-2" style="flex-wrap:wrap;">
+        <a href="{{ url_for('profile.edit') }}" class="btn btn-secondary btn-sm">
+          <i class="fas fa-edit"></i> Edit Profile
+        </a>
+        <a href="{{ url_for('workout.generate') }}" class="btn btn-primary btn-sm">
+          <i class="fas fa-sync-alt"></i> Regenerate Plans
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page-content">
+  <div class="container">
+
+    <!-- STATS ROW -->
+    <div class="grid-4 mb-4">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(108,99,255,0.15);">
+          <i class="fas fa-weight" style="color:var(--primary);"></i>
+        </div>
+        <div>
+          <div class="stat-label">Current Weight</div>
+          <div class="stat-value">{{ user.weight_kg or '—' }} <small style="font-size:0.9rem;font-weight:500;color:var(--muted);">kg</small></div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(67,233,123,0.15);">
+          <i class="fas fa-ruler-vertical" style="color:var(--success);"></i>
+        </div>
+        <div>
+          <div class="stat-label">Height</div>
+          <div class="stat-value">{{ user.height_cm or '—' }} <small style="font-size:0.9rem;font-weight:500;color:var(--muted);">cm</small></div>
+        </div>
+      </div>
+      <div class="stat-card">
+        {% set bmi = user.bmi() %}
+        {% set bmi_cat = user.bmi_category() %}
+        <div class="stat-icon" style="background:rgba(247,151,30,0.15);">
+          <i class="fas fa-heartbeat" style="color:var(--warning);"></i>
+        </div>
+        <div>
+          <div class="stat-label">BMI</div>
+          <div class="stat-value">
+            {{ bmi or '—' }}
+            <small style="font-size:0.75rem;color:{% if bmi_cat == 'Normal' %}var(--success){% elif bmi_cat == 'Underweight' %}var(--info){% else %}var(--warning){% endif %};">
+              {{ bmi_cat }}
+            </small>
+          </div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(255,101,132,0.15);">
+          <i class="fas fa-fire" style="color:var(--secondary);"></i>
+        </div>
+        <div>
+          <div class="stat-label">Daily Budget</div>
+          <div class="stat-value">${{ user.budget_per_day or '—' }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROFILE SUMMARY + AI TIP -->
+    <div class="grid-2 mb-4">
+      <div class="card">
+        <h3 style="font-size:1rem;font-weight:700;margin-bottom:1.5rem;">
+          <i class="fas fa-user-circle text-primary"></i> Your Profile
+        </h3>
+        <div style="display:flex;flex-direction:column;gap:0.75rem;font-size:0.9rem;">
+          <div class="flex-between"><span class="text-muted">Goal</span><span class="badge badge-primary">{{ user.goal | replace('_', ' ') | title if user.goal else '—' }}</span></div>
+          <div class="flex-between"><span class="text-muted">Fitness Level</span><span class="badge badge-success">{{ user.fitness_level | title if user.fitness_level else '—' }}</span></div>
+          <div class="flex-between"><span class="text-muted">Diet Type</span><span class="badge badge-warning">{{ user.diet_type | title if user.diet_type else '—' }}</span></div>
+          <div class="flex-between"><span class="text-muted">Food Culture</span><span class="badge badge-info">{{ user.food_culture | title if user.food_culture else '—' }}</span></div>
+          <div class="flex-between"><span class="text-muted">Equipment</span><span class="badge badge-danger">{{ user.available_equipment | replace('_', ' ') | title if user.available_equipment else '—' }}</span></div>
+          <div class="flex-between"><span class="text-muted">Workout Days</span><span class="badge badge-primary">{{ user.workout_days_per_week or '—' }} days/week</span></div>
+        </div>
+      </div>
+
+      <div class="tip-card">
+        <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;color:var(--primary);">
+          <i class="fas fa-bolt"></i> AI Tip of the Day
+        </h3>
+        <p style="font-size:0.95rem;line-height:1.8;position:relative;z-index:1;">{{ tip }}</p>
+        <div class="mt-2" style="font-size:0.78rem;color:var(--muted);">
+          <i class="fas fa-robot"></i> Powered by Google Gemini AI
+        </div>
+      </div>
+    </div>
+
+    <!-- PLAN ACTIONS -->
+    <h3 style="font-size:1.2rem;font-weight:700;margin-bottom:1.5rem;">
+      <i class="fas fa-calendar-check text-primary"></i> Your AI Plans
+    </h3>
+    <div class="grid-2 mb-4">
+      <!-- WORKOUT PLAN -->
+      <div class="plan-action-card">
+        <div class="plan-icon" style="background:rgba(108,99,255,0.15);">💪</div>
+        <h3 style="font-size:1.15rem;font-weight:700;margin-bottom:0.5rem;">Workout Plan</h3>
+        {% if workout_plan %}
+          <p class="text-muted" style="font-size:0.85rem;margin-bottom:1rem;">
+            {{ workout_plan.title }}<br>
+            <small>Generated: {{ workout_plan.created_at.strftime('%b %d, %Y') }}</small>
+          </p>
+          <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;">
+            <a href="{{ url_for('workout.view', plan_id=workout_plan.id) }}" class="btn btn-primary btn-sm">
+              <i class="fas fa-eye"></i> View Plan
+            </a>
+            <a href="{{ url_for('workout.generate') }}" class="btn btn-secondary btn-sm">
+              <i class="fas fa-sync-alt"></i> Regenerate
+            </a>
+          </div>
+        {% else %}
+          <p class="text-muted" style="font-size:0.9rem;margin-bottom:1.25rem;">No workout plan yet. Generate your first AI plan!</p>
+          <a href="{{ url_for('workout.generate') }}" class="btn btn-primary">
+            <i class="fas fa-magic"></i> Generate Plan
+          </a>
+        {% endif %}
+      </div>
+
+      <!-- DIET PLAN -->
+      <div class="plan-action-card">
+        <div class="plan-icon" style="background:rgba(67,233,123,0.15);">🥗</div>
+        <h3 style="font-size:1.15rem;font-weight:700;margin-bottom:0.5rem;">Diet & Meal Plan</h3>
+        {% if diet_plan %}
+          <p class="text-muted" style="font-size:0.85rem;margin-bottom:1rem;">
+            {{ diet_plan.title }}<br>
+            <small>{{ diet_plan.daily_calories }} kcal/day &bull; Generated: {{ diet_plan.created_at.strftime('%b %d, %Y') }}</small>
+          </p>
+          <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;">
+            <a href="{{ url_for('diet.view', plan_id=diet_plan.id) }}" class="btn btn-success btn-sm">
+              <i class="fas fa-eye"></i> View Plan
+            </a>
+            <a href="{{ url_for('diet.generate') }}" class="btn btn-secondary btn-sm">
+              <i class="fas fa-sync-alt"></i> Regenerate
+            </a>
+          </div>
+        {% else %}
+          <p class="text-muted" style="font-size:0.9rem;margin-bottom:1.25rem;">No meal plan yet. Generate your personalized diet plan!</p>
+          <a href="{{ url_for('diet.generate') }}" class="btn btn-success">
+            <i class="fas fa-utensils"></i> Generate Plan
+          </a>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

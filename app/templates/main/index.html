@@ -1,0 +1,314 @@
+{% extends "base.html" %}
+{% block title %}FitAI – AI-Powered Personalized Fitness & Diet Planner{% endblock %}
+
+{% block extra_css %}
+<style>
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    background: radial-gradient(ellipse at top left, rgba(108,99,255,0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at bottom right, rgba(255,101,132,0.1) 0%, transparent 50%),
+                var(--bg);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content:'';
+    position:absolute;
+    width:600px; height:600px;
+    background:radial-gradient(circle, rgba(108,99,255,0.08) 0%, transparent 70%);
+    top:-200px; right:-100px;
+    border-radius:50%;
+    animation:float 8s ease-in-out infinite;
+  }
+  .hero::after {
+    content:'';
+    position:absolute;
+    width:400px; height:400px;
+    background:radial-gradient(circle, rgba(255,101,132,0.08) 0%, transparent 70%);
+    bottom:-100px; left:-100px;
+    border-radius:50%;
+    animation:float 10s ease-in-out infinite reverse;
+  }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-30px)} }
+
+  .hero-content { position:relative; z-index:1; max-width:700px; }
+  .hero-badge {
+    display:inline-flex; align-items:center; gap:0.5rem;
+    background:rgba(108,99,255,0.15); border:1px solid rgba(108,99,255,0.3);
+    color:var(--primary); padding:0.4rem 1rem; border-radius:100px;
+    font-size:0.8rem; font-weight:600; margin-bottom:1.5rem;
+    animation:pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(108,99,255,0.4)} 50%{box-shadow:0 0 0 8px rgba(108,99,255,0)} }
+
+  .hero h1 {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 900;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+    letter-spacing: -1.5px;
+  }
+  .hero h1 .gradient-text {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .hero p { font-size:1.15rem; color:var(--muted); margin-bottom:2rem; line-height:1.8; max-width:580px; }
+
+  .hero-actions { display:flex; gap:1rem; flex-wrap:wrap; }
+  .hero-stats {
+    display:flex; gap:2.5rem; margin-top:3rem;
+    padding-top:2rem; border-top:1px solid var(--border);
+  }
+  .hero-stat-num { font-size:1.8rem; font-weight:800; color:var(--primary); }
+  .hero-stat-label { font-size:0.8rem; color:var(--muted); font-weight:500; }
+
+  .hero-visual {
+    position: relative;
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:500px;
+  }
+  .floating-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+    position: absolute;
+    backdrop-filter: blur(10px);
+    min-width: 200px;
+    box-shadow: var(--shadow-lg);
+  }
+  .fc-1 { top:60px; left:0; animation:floatCard 6s ease-in-out infinite; }
+  .fc-2 { top:180px; right:0; animation:floatCard 7s ease-in-out infinite reverse; }
+  .fc-3 { bottom:100px; left:40px; animation:floatCard 8s ease-in-out infinite 1s; }
+  @keyframes floatCard { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-15px)} }
+
+  .features { padding: 5rem 0; }
+  .section-title {
+    text-align:center; margin-bottom:3.5rem;
+  }
+  .section-title h2 {
+    font-size:2.5rem; font-weight:800; letter-spacing:-1px;
+    background:linear-gradient(135deg,var(--text),var(--primary));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  }
+  .section-title p { color:var(--muted); margin-top:0.75rem; font-size:1.05rem; }
+
+  .feature-card {
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:2rem;
+    text-align:center;
+    transition:all 0.3s;
+    cursor:default;
+  }
+  .feature-card:hover {
+    transform:translateY(-6px);
+    border-color:var(--primary);
+    box-shadow:var(--shadow);
+  }
+  .feature-icon {
+    width:64px; height:64px;
+    border-radius:var(--radius-sm);
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.8rem; margin:0 auto 1.25rem;
+  }
+  .feature-card h3 { font-size:1.15rem; font-weight:700; margin-bottom:0.75rem; }
+  .feature-card p { color:var(--muted); font-size:0.9rem; line-height:1.7; }
+
+  .steps-section { padding:4rem 0; }
+  .step { display:flex; gap:1.5rem; align-items:flex-start; margin-bottom:2.5rem; }
+  .step-num {
+    width:48px; height:48px; border-radius:50%; flex-shrink:0;
+    background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+    display:flex; align-items:center; justify-content:center;
+    font-weight:800; font-size:1.1rem; color:white;
+    box-shadow:0 4px 15px rgba(108,99,255,0.4);
+  }
+  .step-content h3 { font-size:1.1rem; font-weight:700; margin-bottom:0.4rem; }
+  .step-content p { color:var(--muted); font-size:0.9rem; }
+
+  .cta-section {
+    padding:5rem 0; text-align:center;
+    background:radial-gradient(ellipse at center, rgba(108,99,255,0.1) 0%, transparent 70%);
+  }
+  .cta-section h2 { font-size:2.5rem; font-weight:800; margin-bottom:1rem; }
+  .cta-section p { color:var(--muted); font-size:1.05rem; margin-bottom:2rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- HERO -->
+<section class="hero">
+  <div class="container" style="display:flex; align-items:center; gap:4rem; flex-wrap:wrap; padding:4rem 1.5rem;">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <i class="fas fa-bolt"></i> Powered by Google Gemini AI
+      </div>
+      <h1>
+        Your Personal<br>
+        <span class="gradient-text">AI Fitness Coach</span><br>
+        & Diet Expert
+      </h1>
+      <p>
+        Stop following generic plans. Get hyper-personalized workout routines and 
+        meal plans built around <strong>your body, culture, budget, and goals</strong> — 
+        designed specifically for students.
+      </p>
+      <div class="hero-actions">
+        <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">
+          <i class="fas fa-rocket"></i> Start Free Today
+        </a>
+        <a href="{{ url_for('auth.login') }}" class="btn btn-secondary btn-lg">
+          <i class="fas fa-sign-in-alt"></i> Sign In
+        </a>
+      </div>
+      <div class="hero-stats">
+        <div>
+          <div class="hero-stat-num">100%</div>
+          <div class="hero-stat-label">Personalized</div>
+        </div>
+        <div>
+          <div class="hero-stat-num">AI</div>
+          <div class="hero-stat-label">Powered Plans</div>
+        </div>
+        <div>
+          <div class="hero-stat-num">Free</div>
+          <div class="hero-stat-label">For Students</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="floating-card fc-1">
+        <div style="font-size:0.75rem;color:var(--muted);margin-bottom:0.5rem;">TODAY'S WORKOUT</div>
+        <div style="font-weight:700;margin-bottom:0.5rem;">💪 Upper Body Push</div>
+        <div style="font-size:0.8rem;color:var(--muted);">45 min • 6 exercises • 320 kcal</div>
+        <div class="progress-bar mt-2"><div class="progress-fill" style="width:60%;background:linear-gradient(90deg,var(--primary),var(--secondary));"></div></div>
+      </div>
+      <div class="floating-card fc-2">
+        <div style="font-size:0.75rem;color:var(--muted);margin-bottom:0.5rem;">TODAY'S CALORIES</div>
+        <div style="font-size:1.8rem;font-weight:800;color:var(--accent);">1,840</div>
+        <div style="font-size:0.8rem;color:var(--muted);">kcal target</div>
+        <div style="margin-top:0.75rem;display:flex;gap:0.5rem;font-size:0.75rem;">
+          <span style="color:#43e97b;">P: 145g</span>
+          <span style="color:#f7971e;">C: 185g</span>
+          <span style="color:#ff6584;">F: 62g</span>
+        </div>
+      </div>
+      <div class="floating-card fc-3">
+        <div style="font-size:0.75rem;color:var(--muted);margin-bottom:0.5rem;">🥗 LUNCH TODAY</div>
+        <div style="font-weight:700;">Chicken Dal Rice</div>
+        <div style="font-size:0.8rem;color:var(--muted);">₹50 • 520 kcal • 30g protein</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features">
+  <div class="container">
+    <div class="section-title">
+      <h2>Everything You Need to Transform</h2>
+      <p>Personalized, practical, and perfect for students on any budget</p>
+    </div>
+    <div class="grid-3">
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(108,99,255,0.15);">🤖</div>
+        <h3>AI-Powered Plans</h3>
+        <p>Google Gemini AI generates fully personalized workout and diet plans tailored exactly to your body, goals, and lifestyle.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(67,233,123,0.15);">🌍</div>
+        <h3>Cultural Food Respect</h3>
+        <p>Meal plans that respect your cultural food preferences — Indian, Western, Asian, Mediterranean, and more.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(247,151,30,0.15);">💰</div>
+        <h3>Budget-Friendly</h3>
+        <p>Plans designed within your daily food budget. Eat healthy without breaking the bank as a student.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(255,101,132,0.15);">🏠</div>
+        <h3>Any Equipment</h3>
+        <p>Whether you have no equipment, home basics, or a full gym — we build the perfect plan for your setup.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(79,195,247,0.15);">⚡</div>
+        <h3>Quick Generation</h3>
+        <p>Get your complete 7-day workout and meal plan generated in seconds. Update anytime as your fitness improves.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(124,92,216,0.15);">🎯</div>
+        <h3>Goal-Specific</h3>
+        <p>Weight loss, muscle gain, endurance, flexibility — each plan is laser-focused on your specific fitness goal.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="steps-section" style="background:var(--card);padding:4rem 0;">
+  <div class="container">
+    <div class="section-title">
+      <h2>How It Works</h2>
+      <p>Get your personalized plan in 3 simple steps</p>
+    </div>
+    <div class="grid-2" style="align-items:start;">
+      <div>
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <h3>Create Your Account</h3>
+            <p>Sign up for free in under a minute. No credit card required.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <h3>Complete Your Profile</h3>
+            <p>Tell us about your body, goals, diet preferences, food culture, budget, and available equipment.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <h3>Get AI-Generated Plans</h3>
+            <p>Our AI instantly generates your complete 7-day workout routine and meal plan, ready to follow.</p>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="padding:2rem;">
+        <h3 style="margin-bottom:1.5rem;font-size:1.1rem;">🧑‍💻 Student Profile Example</h3>
+        <div style="display:flex;flex-direction:column;gap:0.75rem;font-size:0.9rem;">
+          <div class="flex-between"><span style="color:var(--muted);">Goal</span><span class="badge badge-primary">💪 Muscle Gain</span></div>
+          <div class="flex-between"><span style="color:var(--muted);">Diet</span><span class="badge badge-success">🇮🇳 Indian Vegetarian</span></div>
+          <div class="flex-between"><span style="color:var(--muted);">Equipment</span><span class="badge badge-warning">🏠 Home Basics</span></div>
+          <div class="flex-between"><span style="color:var(--muted);">Budget</span><span class="badge badge-info">$5/day</span></div>
+          <div class="flex-between"><span style="color:var(--muted);">Schedule</span><span class="badge badge-danger">4 days/week</span></div>
+        </div>
+        <hr style="border-color:var(--border);margin:1.5rem 0;">
+        <div style="font-size:0.85rem;color:var(--muted);">
+          ✅ AI generates: <strong style="color:var(--text);">High-protein paneer/dal meals + progressive overload bodyweight plan</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="container">
+    <h2>Ready to Transform Your Body?</h2>
+    <p>Join thousands of students building healthier habits with AI-powered plans.</p>
+    <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">
+      <i class="fas fa-rocket"></i> Get Your Free AI Plan Now
+    </a>
+  </div>
+</section>
+{% endblock %}
