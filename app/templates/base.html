@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>{% block title %}FitAI – Personalized Fitness & Diet Planner{% endblock %}</title>
+  <title>{% block title %}ZyvaFit – Personalized Fitness & Diet Planner{% endblock %}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
@@ -318,7 +318,7 @@
 <!-- NAVBAR -->
 <nav class="navbar">
   <a href="{{ url_for('main.index') }}" class="navbar-brand">
-    <i class="fas fa-dumbbell"></i> FitAI
+    <i class="fas fa-dumbbell"></i> ZyvaFit
   </a>
   <ul class="nav-links">
     {% if current_user.is_authenticated %}
@@ -352,7 +352,7 @@
 
 <!-- FOOTER -->
 <footer class="footer">
-  <p>⚡ FitAI – Personalized Workout & Diet Planner &nbsp;|&nbsp; Powered by Google Gemini AI</p>
+  <p>⚡ ZyvaFit – Personalized Workout & Diet Planner &nbsp;|&nbsp; Powered by Google Gemini AI</p>
   <p class="mt-1" style="font-size:0.75rem;">Made for students. Stay consistent, stay fit! 💪</p>
 </footer>
 
