@@ -1,9 +1,14 @@
-from flask import Blueprint, render_template, redirect, url_for
+from flask import Blueprint, render_template, redirect, url_for, jsonify
 from flask_login import login_required, current_user
 from app.models import WorkoutPlan, DietPlan, ProgressLog
 from app.ai_engine import get_fitness_tip
 
 main_bp = Blueprint('main', __name__)
+
+
+@main_bp.route('/ping')
+def ping():
+    return jsonify({'status': 'ok'}), 200
 
 
 @main_bp.route('/')
