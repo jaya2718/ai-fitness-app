@@ -134,7 +134,7 @@ PROFILE:
 - Cultural Food Preference: {culture}
 - Food Allergies/Intolerances: {allergies}
 - Health Conditions: {conditions}
-- Daily Budget: ${budget} USD
+- Daily Budget: ₹{budget} INR
 - Target Daily Calories: {target_calories} kcal
 - TDEE: {tdee} kcal
 
@@ -142,7 +142,7 @@ REQUIREMENTS:
 1. Respect CULTURAL food preferences ({culture} cuisine)
 2. Strictly follow diet type: {diet_type}
 3. AVOID all allergens: {allergies}
-4. Keep meals BUDGET-FRIENDLY (under ${budget}/day)
+4. Keep meals BUDGET-FRIENDLY (under ₹{budget}/day)
 5. Include locally available, affordable ingredients
 6. Provide easy student-friendly meal prep instructions
 7. Include healthy snacks between meals
@@ -173,7 +173,7 @@ Return ONLY valid JSON in this exact format:
           "fats_g": 10,
           "prep_time_min": 10,
           "recipe": "brief cooking instructions",
-          "estimated_cost": "$1.50"
+          "estimated_cost": "₹125"
         }},
         "morning_snack": {{
           "name": "snack name",
@@ -184,7 +184,7 @@ Return ONLY valid JSON in this exact format:
           "fats_g": 5,
           "prep_time_min": 2,
           "recipe": "instructions",
-          "estimated_cost": "$0.50"
+          "estimated_cost": "₹40"
         }},
         "lunch": {{
           "name": "meal name",
@@ -195,7 +195,7 @@ Return ONLY valid JSON in this exact format:
           "fats_g": 15,
           "prep_time_min": 20,
           "recipe": "brief cooking instructions",
-          "estimated_cost": "$2.50"
+          "estimated_cost": "₹210"
         }},
         "afternoon_snack": {{
           "name": "snack name",
@@ -206,7 +206,7 @@ Return ONLY valid JSON in this exact format:
           "fats_g": 5,
           "prep_time_min": 2,
           "recipe": "instructions",
-          "estimated_cost": "$0.75"
+          "estimated_cost": "₹60"
         }},
         "dinner": {{
           "name": "meal name",
@@ -217,7 +217,7 @@ Return ONLY valid JSON in this exact format:
           "fats_g": 20,
           "prep_time_min": 25,
           "recipe": "brief cooking instructions",
-          "estimated_cost": "$3.00"
+          "estimated_cost": "₹250"
         }}
       }}
     }}

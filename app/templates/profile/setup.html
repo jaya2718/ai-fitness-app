@@ -149,8 +149,8 @@
             <div class="form-hint">We'll make sure your meal plan avoids these completely.</div>
           </div>
           <div class="form-group">
-            <label class="form-label">Daily Food Budget (USD) *</label>
-            {{ form.budget_per_day(class="form-control", placeholder="e.g. 8") }}
+            <label class="form-label">Daily Food Budget (₹ INR) *</label>
+            {{ form.budget_per_day(class="form-control", placeholder="e.g. 500") }}
             <div class="form-hint">We'll build affordable meals within your budget.</div>
             {% for e in form.budget_per_day.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
           </div>

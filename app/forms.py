@@ -99,8 +99,8 @@ class ProfileForm(FlaskForm):
     ])
     allergies = StringField('Food Allergies / Intolerances', validators=[Optional()],
                             description='e.g., nuts, gluten, dairy, shellfish (leave blank if none)')
-    budget_per_day = FloatField('Daily Food Budget (USD)', validators=[
-        DataRequired(), NumberRange(min=1, max=100)
+    budget_per_day = FloatField('Daily Food Budget (₹ INR)', validators=[
+        DataRequired(), NumberRange(min=50, max=10000)
     ])
     available_equipment = SelectField('Available Equipment', validators=[DataRequired()], choices=[
         ('', 'Select Equipment'),
