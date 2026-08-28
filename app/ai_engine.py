@@ -7,7 +7,7 @@ load_dotenv()
 def get_model():
     import google.generativeai as genai
     genai.configure(api_key=os.getenv('GEMINI_API_KEY', ''))
-    return genai.GenerativeModel('gemini-2.5-flash')
+    return genai.GenerativeModel('gemini-2.0-flash-lite')
 
 
 def generate_workout_plan(user):
