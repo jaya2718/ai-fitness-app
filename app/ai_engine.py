@@ -6,8 +6,16 @@ load_dotenv()
 
 def get_model():
     import google.generativeai as genai
-    genai.configure(api_key=os.getenv('GEMINI_API_KEY', ''))
-    return genai.GenerativeModel('models/gemini-1.5-flash')
+    api_key = os.getenv('GEMINI_API_KEY', '')
+    genai.configure(api_key=api_key)
+    # Use the stable v1 API model name
+    return genai.GenerativeModel(
+        model_name='gemini-1.5-flash',
+        generation_config={
+            'temperature': 0.7,
+            'max_output_tokens': 8192,
+        }
+    )
 
 
 def generate_workout_plan(user):
