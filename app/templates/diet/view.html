@@ -90,6 +90,14 @@
   .day-summary-stat .num { font-size:1.4rem; font-weight:800; }
   .day-summary-stat .lbl { font-size:0.75rem; color:var(--muted); }
 </style>
+@media print {
+  .navbar, .footer, .plan-hero .btn, .day-tabs, button { display: none !important; }
+  .day-panel { display: block !important; }
+  .meal-card-body { display: block !important; }
+  body { background: white !important; color: black !important; }
+  .meal-card { border: 1px solid #ccc !important; background: white !important; margin-bottom: 1rem; }
+}
+</style>
 {% endblock %}
 
 {% block content %}
@@ -128,6 +136,9 @@
         <a href="{{ url_for('diet.generate') }}" class="btn btn-success btn-sm">
           <i class="fas fa-sync-alt"></i> Regenerate
         </a>
+        <button onclick="downloadPDF()" class="btn btn-warning btn-sm">
+          <i class="fas fa-download"></i> Download PDF
+        </button>
         <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary btn-sm">
           <i class="fas fa-home"></i> Dashboard
         </a>
@@ -306,6 +317,23 @@
 
 {% block extra_js %}
 <script>
+function downloadPDF() {
+  // Expand all meal bodies and day panels before printing
+  document.querySelectorAll('.day-panel').forEach(p => p.style.display = 'block');
+  document.querySelectorAll('.meal-card-body').forEach(b => b.style.display = 'block');
+  document.querySelectorAll('.fa-chevron-down').forEach(i => i.style.transform = 'rotate(180deg)');
+  window.print();
+  // Restore after print
+  setTimeout(() => {
+    document.querySelectorAll('.day-panel').forEach((p, i) => {
+      p.style.display = i === 0 ? 'block' : 'none';
+    });
+    document.querySelectorAll('.meal-card-body').forEach((b, i) => {
+      b.style.display = i === 0 ? 'block' : 'none';
+    });
+  }, 1000);
+}
+
 function showDay(id) {
   document.querySelectorAll('.day-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.day-tab').forEach(t => t.classList.remove('active'));

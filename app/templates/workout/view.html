@@ -132,6 +132,9 @@
         <a href="{{ url_for('workout.generate') }}" class="btn btn-primary btn-sm">
           <i class="fas fa-sync-alt"></i> Regenerate
         </a>
+        <button onclick="downloadPDF()" class="btn btn-warning btn-sm">
+          <i class="fas fa-download"></i> Download PDF
+        </button>
         <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary btn-sm">
           <i class="fas fa-home"></i> Dashboard
         </a>
@@ -285,5 +288,26 @@ function showDay(id) {
   const idx = id.split('-')[1];
   document.getElementById('tab-' + id).classList.add('active');
 }
+
+function downloadPDF() {
+  // Show all day panels before printing
+  document.querySelectorAll('.day-panel').forEach(p => p.style.display = 'block');
+  window.print();
+  // Restore after print
+  setTimeout(() => {
+    document.querySelectorAll('.day-panel').forEach((p, i) => {
+      p.style.display = i === 0 ? 'block' : 'none';
+    });
+    document.querySelectorAll('.day-panel')[0].classList.add('active');
+  }, 1000);
+}
 </script>
+<style>
+@media print {
+  .navbar, .footer, .plan-hero .btn, .day-tabs, button { display: none !important; }
+  .day-panel { display: block !important; page-break-before: auto; }
+  body { background: white !important; color: black !important; }
+  .exercise-card, .warmup-item, .cooldown-item { border: 1px solid #ccc !important; background: white !important; }
+}
+</style>
 {% endblock %}
