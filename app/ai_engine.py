@@ -7,6 +7,22 @@ load_dotenv()
 def get_model():
     import google.generativeai as genai
     genai.configure(api_key=os.getenv('GEMINI_API_KEY', ''))
+    # Try models in order until one works
+    models_to_try = [
+        'gemini-pro',
+        'gemini-1.0-pro',
+        'gemini-1.5-pro',
+        'gemini-1.5-flash',
+    ]
+    for model_name in models_to_try:
+        try:
+            model = genai.GenerativeModel(model_name)
+            # Quick test to verify it works
+            model.generate_content('test', generation_config={'max_output_tokens': 5})
+            return model
+        except Exception:
+            continue
+    # Last resort fallback
     return genai.GenerativeModel('gemini-pro')
 
 
